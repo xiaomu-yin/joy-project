@@ -1,0 +1,3 @@
+df_merge=pd.concat(dfs)
+print(df_merge)
+df_merge.to_json('3months joined.json',orient='records',lines=True)
