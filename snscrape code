@@ -1,0 +1,36 @@
+import pandas as pd
+import snscrape.modules.twitter as sntwitter
+from datetime import timezone, datetime
+
+
+
+
+
+config=[
+    {"cfg":"since:2019-10-1 until:2019-10-31","name":"2019oct"},
+    {"cfg":"since:2020-10-1 until:2020-10-31","name":"2020oct"},
+    {"cfg":"since:2021-10-1 until:2021-10-31","name":"2021oct"},
+]
+
+dfs=[]
+for cf in config:
+    tweets = []
+    print("="*20)
+    print(f"setting date : {cf['cfg']}\noutput file : {cf['name']}.json")
+    #genererating data
+    #we can also add within example : near:chicago within:100km
+    for i,tweet in enumerate(sntwitter.TwitterSearchScraper(f'joy {cf["cfg"]} near:Chicago').get_items()):
+        tweets.append([tweet.date, tweet.id, tweet.content])
+
+
+    df_coord = pd.DataFrame(tweets, columns=['Datetime', 'Tweet Id', 'Text']) #create dataframe from results
+    df_coord['Datetime']=df_coord['Datetime'].apply(lambda x:x.astimezone(timezone.utc).strftime('%Y, %b-%d %H:%M:%S')) #change date to readable date
+    df_coord.to_json(f'{cf["name"]}.json',orient='records',lines=True) #creting json each month
+    print(df_coord)
+
+    total_rows=len(df_coord.index) #calculate rows
+    print(f"Total rows : {total_rows}")
+    print("="*20)
+
+    #join dataframe
+    dfs.append(df_coord)
